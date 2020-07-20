@@ -1,20 +1,13 @@
 #!/bin/bash
 
-GFS_STAGED_FG=2
-GFS_NOT_STAGED_FG=1
-GFS_UNTRACKED_FG=3
-GFS_IGNORED_FG=240
-
-GFS_STAGED_TITLE="Staged"
-GFS_NOT_STAGED_TITLE="Not staged"
-GFS_UNTRACKED_TITLE="Untracked"
-GFS_IGNORED_TITLE="Ignored"
-
-GFS_MODIFIED_TEXT="modified"
-GFS_ADDED_TEXT="new file"
-GFS_DELETED_TEXT="deleted"
-GFS_RENAMED_TEXT="renamed"
-GFS_COPIED_TEXT="copied"
+# helper functions
+function config() {
+	local name="$1"
+	local default="$2"
+	local value=$(git config "fancy-status.$name")
+	[ -z "$value" ] && value=$default
+	echo $value
+}
 
 function print_files() {
 	local status="$1"
@@ -27,6 +20,23 @@ function print_files() {
   	echo -e " $status$file"
 	done
 }
+
+# configuration variables
+STAGED_FG=$(config "stageFg" "2")
+NOT_STAGED_FG=$(config "notStagedFg" "1")
+UNTRACKED_FG=$(config "untrackedFg" "3")
+IGNORED_FG=$(config "ignoredFg" "240")
+
+STAGED_TITLE=$(config "stagedTitle" "staged")
+NOT_STAGED_TITLE=$(config "notStagedTitle" "not staged")
+UNTRACKED_TITLE=$(config "untrackedTitle" "untracked")
+IGNORED_TITLE=$(config "ignoredTitle" "ignored")
+
+MODIFIED_TEXT=$(config "modifiedText" "modified")
+ADDED_TEXT=$(config "addedText" "new file")
+DELETED_TEXT=$(config "deletedText" "deleted")
+RENAMED_TEXT=$(config "renamedText" "renamed")
+COPIED_TEXT=$(config "copiedText" "copied")
 
 modified_idx=()
 modified_wrk=()
@@ -73,40 +83,40 @@ done < <(git status "$@" --porcelain)
 
 idx_count=$((${#modified_idx[@]}+${#added_idx[@]}+${#deleted_idx[@]}+${#renamed_idx[@]}+${#copied_idx[@]}+${#unmerged_idx[@]}))
 if [ "$idx_count" -gt 0 ]; then
-	tput setaf $GFS_STAGED_FG
-	echo "$GFS_STAGED_TITLE ($idx_count)"
-	print_files "$GFS_MODIFIED_TEXT" "${modified_idx[@]}"
-	print_files "$GFS_ADDED_TEXT" "${added_idx[@]}"
-	print_files "$GFS_DELETED_TEXT" "${deleted_idx[@]}"
-	print_files "$GFS_RENAMED_TEXT" "${renamed_idx[@]}"
-	print_files "$GFS_COPIED_TEXT" "${copied_idx[@]}"
+	tput setaf $STAGED_FG
+	echo "$STAGED_TITLE ($idx_count)"
+	print_files "$MODIFIED_TEXT" "${modified_idx[@]}"
+	print_files "$ADDED_TEXT" "${added_idx[@]}"
+	print_files "$DELETED_TEXT" "${deleted_idx[@]}"
+	print_files "$RENAMED_TEXT" "${renamed_idx[@]}"
+	print_files "$COPIED_TEXT" "${copied_idx[@]}"
 	tput sgr0
 fi
 
 wrk_count=$((${#modified_wrk[@]}+${#added_wrk[@]}+${#deleted_wrk[@]}+${#renamed_wrk[@]}+${#copied_wrk[@]}+${#unmerged_wrk[@]}))
 if [ "$wrk_count" -gt 0 ]; then
-	tput setaf $GFS_NOT_STAGED_FG
-	echo "$GFS_NOT_STAGED_TITLE ($wrk_count)"
-	print_files "$GFS_ADDED_TEXT" "${added_wrk[@]}"
-	print_files "$GFS_MODIFIED_TEXT" "${modified_wrk[@]}"
-	print_files "$GFS_DELETED_TEXT" "${deleted_wrk[@]}"
-	print_files "$GFS_RENAMED_TEXT" "${renamed_wrk[@]}"
-	print_files "$GFS_COPIED_TEXT" "${copied_wrk[@]}"
+	tput setaf $NOT_STAGED_FG
+	echo "$NOT_STAGED_TITLE ($wrk_count)"
+	print_files "$ADDED_TEXT" "${added_wrk[@]}"
+	print_files "$MODIFIED_TEXT" "${modified_wrk[@]}"
+	print_files "$DELETED_TEXT" "${deleted_wrk[@]}"
+	print_files "$RENAMED_TEXT" "${renamed_wrk[@]}"
+	print_files "$COPIED_TEXT" "${copied_wrk[@]}"
 	tput sgr0
 fi
 
 untracked_count="${#untracked[@]}"
 if [ "$untracked_count" -gt 0 ]; then
-	tput setaf $GFS_UNTRACKED_FG
-	echo "$GFS_UNTRACKED_TITLE ($untracked_count)"
+	tput setaf $UNTRACKED_FG
+	echo "$UNTRACKED_TITLE ($untracked_count)"
 	print_files "" "${untracked[@]}"
 	tput sgr0
 fi
 
 ignored_count="${#ignored[@]}"
 if [ "$ignored_count" -gt 0 ]; then
-	tput setaf $GFS_IGNORED_FG
-	echo "$GFS_IGNORED_TITLE ($ignored_count)"
+	tput setaf $IGNORED_FG
+	echo "$IGNORED_TITLE ($ignored_count)"
 	print_files "" "${ignored[@]}"
 	tput sgr0
 fi

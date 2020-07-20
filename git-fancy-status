@@ -24,7 +24,7 @@ function print_files() {
 	[ "$status" != "" ] && status="$status:   "
 
 	for file in "${files[@]}"; do
-		echo -e "\t$status$file"
+  	echo -e " $status$file"
 	done
 }
 
